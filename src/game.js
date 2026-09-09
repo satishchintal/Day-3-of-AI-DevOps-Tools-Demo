@@ -1,1 +1,136 @@
-const c=document.getElementById('game'),x=c.getContext('2d'),score=document.getElementById('score'),speed=document.getElementById('speed'),overlay=document.getElementById('overlay');let run=false,s=0,spd=8,off=0,t=0,keys=new Set(),p={x:427,y:500,w:46,h:82},cars=[];const lanes=[335,450,565];function clamp(v,a,b){return Math.max(a,Math.min(b,v))}function overlaps(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}function reset(){s=0;spd=8;off=0;t=0;cars=[];p.x=427;score.textContent=0;speed.textContent=8}function start(){reset();run=true;overlay.classList.add('hidden')}function spawn(){let l=lanes[Math.floor(Math.random()*lanes.length)];cars.push({x:l-23,y:-100,w:46,h:82,v:3+Math.random()*3,hue:Math.random()*360})}function car(a,player=false){x.save();x.translate(a.x+a.w/2,a.y+a.h/2);x.fillStyle=player?'#ff3d71':`hsl(${a.hue},75%,58%)`;x.shadowBlur=player?24:12;x.shadowColor=x.fillStyle;x.beginPath();x.roundRect(-a.w/2,-a.h/2,a.w,a.h,10);x.fill();x.shadowBlur=0;x.fillStyle='#101522';x.beginPath();x.roundRect(-14,-22,28,38,7);x.fill();x.restore()}function draw(){x.fillStyle='#0d291f';x.fillRect(0,0,900,600);x.fillStyle='#272b36';x.fillRect(280,0,340,600);x.fillStyle='#e9ecf4';x.fillRect(270,0,10,600);x.fillRect(620,0,10,600);for(let y=-80+off;y<600;y+=120){x.fillRect(390,y,8,58);x.fillRect(502,y,8,58)}cars.forEach(a=>car(a));car(p,true)}function update(dt){if(!run)return;let d=(keys.has('ArrowRight')||keys.has('d')?1:0)-(keys.has('ArrowLeft')||keys.has('a')?1:0);p.x=clamp(p.x+d*420*dt,292,582-p.w);off=(off+spd*42*dt)%120;t-=dt;if(t<=0){spawn();t=Math.max(.38,.85-s/1000)}cars.forEach(a=>a.y+=(spd*22+a.v*16)*dt);if(cars.some(a=>overlaps(p,a))){run=false;overlay.classList.remove('hidden');overlay.querySelector('h2').textContent='Race over';overlay.querySelector('p').textContent=`Final score: ${Math.floor(s)}. Race again!`;document.getElementById('startBtn').textContent='RACE AGAIN'}cars=cars.filter(a=>a.y<700);s+=dt*spd;spd=Math.min(18,8+s/180);score.textContent=Math.floor(s);speed.textContent=spd.toFixed(0)}let last=performance.now();function loop(now){let dt=Math.min((now-last)/1000,.05);last=now;update(dt);draw();requestAnimationFrame(loop)}addEventListener('keydown',e=>{keys.add(e.key);if(e.key==='Enter'&&!run)start()});addEventListener('keyup',e=>keys.delete(e.key));document.getElementById('startBtn').onclick=start;document.getElementById('restartBtn').onclick=start;reset();requestAnimationFrame(loop);if(typeof module!=='undefined')module.exports={clamp,overlaps};
+function clamp(v, a, b) {
+  return Math.max(a, Math.min(b, v));
+}
+
+function overlaps(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+if (typeof module !== "undefined") {
+  module.exports = { clamp, overlaps };
+}
+
+if (typeof document !== "undefined") {
+  const c = document.getElementById("game");
+  const x = c.getContext("2d");
+  const score = document.getElementById("score");
+  const speed = document.getElementById("speed");
+  const overlay = document.getElementById("overlay");
+  let run = false;
+  let s = 0;
+  let spd = 8;
+  let off = 0;
+  let t = 0;
+  const keys = new Set();
+  const p = { x: 427, y: 500, w: 46, h: 82 };
+  let cars = [];
+  const lanes = [335, 450, 565];
+
+  function reset() {
+    s = 0;
+    spd = 8;
+    off = 0;
+    t = 0;
+    cars = [];
+    p.x = 427;
+    score.textContent = 0;
+    speed.textContent = 8;
+  }
+
+  function start() {
+    reset();
+    run = true;
+    overlay.classList.add("hidden");
+  }
+
+  function spawn() {
+    const l = lanes[Math.floor(Math.random() * lanes.length)];
+    cars.push({
+      x: l - 23,
+      y: -100,
+      w: 46,
+      h: 82,
+      v: 3 + Math.random() * 3,
+      hue: Math.random() * 360,
+    });
+  }
+
+  function car(a, player = false) {
+    x.save();
+    x.translate(a.x + a.w / 2, a.y + a.h / 2);
+    x.fillStyle = player ? "#ff3d71" : `hsl(${a.hue},75%,58%)`;
+    x.shadowBlur = player ? 24 : 12;
+    x.shadowColor = x.fillStyle;
+    x.beginPath();
+    x.roundRect(-a.w / 2, -a.h / 2, a.w, a.h, 10);
+    x.fill();
+    x.shadowBlur = 0;
+    x.fillStyle = "#101522";
+    x.beginPath();
+    x.roundRect(-14, -22, 28, 38, 7);
+    x.fill();
+    x.restore();
+  }
+
+  function draw() {
+    x.fillStyle = "#0d291f";
+    x.fillRect(0, 0, 900, 600);
+    x.fillStyle = "#272b36";
+    x.fillRect(280, 0, 340, 600);
+    x.fillStyle = "#e9ecf4";
+    x.fillRect(270, 0, 10, 600);
+    x.fillRect(620, 0, 10, 600);
+    for (let y = -80 + off; y < 600; y += 120) {
+      x.fillRect(390, y, 8, 58);
+      x.fillRect(502, y, 8, 58);
+    }
+    cars.forEach((a) => car(a));
+    car(p, true);
+  }
+
+  function update(dt) {
+    if (!run) return;
+    const d =
+      (keys.has("ArrowRight") || keys.has("d") ? 1 : 0) -
+      (keys.has("ArrowLeft") || keys.has("a") ? 1 : 0);
+    p.x = clamp(p.x + d * 420 * dt, 292, 582 - p.w);
+    off = (off + spd * 42 * dt) % 120;
+    t -= dt;
+    if (t <= 0) {
+      spawn();
+      t = Math.max(0.38, 0.85 - s / 1000);
+    }
+    cars.forEach((a) => (a.y += (spd * 22 + a.v * 16) * dt));
+    if (cars.some((a) => overlaps(p, a))) {
+      run = false;
+      overlay.classList.remove("hidden");
+      overlay.querySelector("h2").textContent = "Race over";
+      overlay.querySelector("p").textContent = `Final score: ${Math.floor(s)}. Race again!`;
+      document.getElementById("startBtn").textContent = "RACE AGAIN";
+    }
+    cars = cars.filter((a) => a.y < 700);
+    s += dt * spd;
+    spd = Math.min(18, 8 + s / 180);
+    score.textContent = Math.floor(s);
+    speed.textContent = spd.toFixed(0);
+  }
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  addEventListener("keydown", (e) => {
+    keys.add(e.key);
+    if (e.key === "Enter" && !run) start();
+  });
+  addEventListener("keyup", (e) => keys.delete(e.key));
+  document.getElementById("startBtn").onclick = start;
+  document.getElementById("restartBtn").onclick = start;
+  reset();
+  requestAnimationFrame(loop);
+}
